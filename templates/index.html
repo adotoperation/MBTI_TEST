@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.영어학원 MBTI 테스트</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+KR:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --secondary: #ec4899;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #eef2ff 0%, #fef2f2 100%);
+            color: var(--text);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            /* Prevent scrolling entirely */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header & Progress */
+        header {
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .progress-wrapper {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .step-indicator {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        /* Test Area */
+        main {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .wizard-container {
+            width: 100%;
+            max-width: 500px;
+            height: 600px;
+            position: relative;
+        }
+
+        .card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            display: none;
+            /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.6s;
+        }
+
+        .card.active {
+            display: flex;
+            z-index: 10;
+        }
+
+        /* Animations */
+        .card.exit-left {
+            display: flex;
+            transform: translateX(-150%) rotate(-10deg);
+            opacity: 0;
+        }
+
+        .card.exit-right {
+            display: flex;
+            transform: translateX(150%) rotate(10deg);
+            opacity: 0;
+        }
+
+        .card.enter-right {
+            display: flex;
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        .question-badge {
+            background: #f1f5ff;
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 99px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #334155;
+            line-height: 1.4;
+            margin-bottom: 50px;
+            word-break: keep-all;
+        }
+
+        .options-grid {
+            width: 100%;
+            display: grid;
+            gap: 15px;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 22px;
+            border: 2px solid #f1f5f9;
+            border-radius: 20px;
+            background: white;
+            color: #475569;
+            font-size: 1.15rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            outline: none;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-light);
+            background: #f8faff;
+            color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.1);
+        }
+
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Welcome Card Special */
+        #card-welcome .question-text {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 30px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .name-input:focus {
+            border-color: var(--primary);
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 22px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .start-btn:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+        /* Footer Nav */
+        footer {
+            padding: 20px 0;
+            text-align: center;
+            z-index: 50;
+        }
+
+        .back-link {
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .back-link:hover {
+            opacity: 1;
+        }
+
+        /* Hidden radio logic */
+        .hidden-radio {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">A.영어학원 MBTI 테스트</div>
+        <div id="step-indicator" class="step-indicator">Start Analysis</div>
+        <div class="progress-wrapper">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+    </header>
+
+    <main>
+        <div class="wizard-container">
+            <form action="/submit" method="post" id="mbti-form" novalidate>
+                <!-- Welcome Card -->
+                <div class="card active" id="card-welcome">
+                    <h1 class="question-text">당신은 어떤 강사인가요?</h1>
+                    <p style="color: var(--text-light); margin-bottom: 25px;">분석을 시작하기 위해 정보를 입력해 주세요.</p>
+
+                    <div style="width: 100%; display: grid; gap: 12px; margin-bottom: 25px;">
+                        <input type="text" id="branch_name" name="branch_name" class="name-input" placeholder="지점명"
+                            style="margin-bottom:0;" required>
+                        <input type="text" id="user_name" name="user_name" class="name-input" placeholder="강사명"
+                            style="margin-bottom:0;" required>
+                        <input type="text" id="crm_id" name="crm_id" class="name-input" placeholder="CRM 아이디"
+                            style="margin-bottom:0;" required>
+                        <input type="email" id="email_address" name="email_address" class="name-input"
+                            placeholder="이메일 주소" style="margin-bottom:0;" required>
+                    </div>
+
+                    <button type="button" class="start-btn" onclick="goToNext(0)">테스트 시작하기 (Enter)</button>
+                </div>
+
+                <!-- Question Cards -->
+                {% for q in questions %}
+                <div class="card" id="card-{{ loop.index }}">
+                    <div class="question-badge">Q. {{ loop.index }}</div>
+                    <div class="question-text">{{ q.text }}</div>
+                    <input type="hidden" name="{{ q.id }}_type" value="{{ q.type }}">
+
+                    <div class="options-grid">
+                        <input type="radio" name="{{ q.id }}" id="{{ q.id }}_y" value="Y" class="hidden-radio" required>
+                        <button type="button" class="option-btn" id="btn-{{ loop.index }}-y"
+                            onclick="selectOption('{{ q.id }}_y', {{ loop.index }})">그렇다</button>
+
+                        <input type="radio" name="{{ q.id }}" id="{{ q.id }}_n" value="N" class="hidden-radio" required>
+                        <button type="button" class="option-btn" id="btn-{{ loop.index }}-n"
+                            onclick="selectOption('{{ q.id }}_n', {{ loop.index }})">아니다</button>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <span class="back-link" onclick="goToPrev({{ loop.index }})">처음으로</span>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Result Processing Card -->
+                <div class="card" id="card-finish">
+                    <h1 class="question-text">분석이 완료되었습니다!</h1>
+                    <p style="color: var(--text-light); margin-bottom: 40px;">당신의 강사 성향 보고서를 준비했습니다.</p>
+                    <button type="submit" class="start-btn">보고서 확인하기</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 MBTI Insight. Premium Personality Analysis.
+    </footer>
+
+    <script>
+        const totalQuestions = {{ questions| length }};
+        const progressBar = document.getElementById('progress-bar');
+        const stepIndicator = document.getElementById('step-indicator');
+        let currentIdx = 0; // 0: welcome, 1~N: questions, N+1: finish
+
+        // Global Keyboard Handler
+        document.addEventListener('keydown', function (event) {
+            if (currentIdx === 0) {
+                // Welcome Screen: Enter to Start
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    goToNext(0);
+                }
+            } else if (currentIdx > 0 && currentIdx <= totalQuestions) {
+                // Question Screens
+                if (event.key === '1' || event.key === 'ArrowLeft') {
+                    // Select Yes (Left)
+                    const yesBtn = document.getElementById(`btn-${currentIdx}-y`);
+                    if (yesBtn) yesBtn.click();
+                } else if (event.key === '2' || event.key === 'ArrowRight') {
+                    // Select No (Right)
+                    const noBtn = document.getElementById(`btn-${currentIdx}-n`);
+                    if (noBtn) noBtn.click();
+                } else if (event.key === 'Enter') {
+                    // Select currently focused element if it's an option button
+                    if (document.activeElement && document.activeElement.classList.contains('option-btn')) {
+                        document.activeElement.click();
+                    } else {
+                        // Default behavior: Select Yes if nothing focused? 
+                        // Or maintain 'Enter' as 'Confirm'. Let's stick to explicit 1/2/Arrows or focus-enter.
+                        // But if user just presses Enter, maybe they expect the primary action?
+                        // Let's safe-guard: if nothing focused, do nothing or user might accidentally click wrong answer.
+                    }
+                }
+            } else if (currentIdx > totalQuestions) {
+                // Finish Screen: Enter to Submit
+                if (event.key === 'Enter') {
+                    // Native form submission should handle this, but if focus is odd:
+                    // document.querySelector('#card-finish button[type="submit"]').click();
+                    // Let's leave standard behavior
+                }
+            }
+        });
+
+        function updateProgress(idx) {
+            let percentage = 0;
+            if (idx === 0) {
+                percentage = 0;
+                stepIndicator.innerText = "Start Analysis";
+            } else if (idx > totalQuestions) {
+                percentage = 100;
+                stepIndicator.innerText = "Complete";
+            } else {
+                percentage = (idx / totalQuestions) * 100;
+                stepIndicator.innerText = `${idx} / ${totalQuestions}`;
+            }
+            progressBar.style.width = percentage + '%';
+        }
+
+        function showCard(idx, direction = 'next') {
+            const cards = document.querySelectorAll('.card');
+            const currentCard = document.querySelector('.card.active');
+            const targetCard = idx === 0 ? document.getElementById('card-welcome') :
+                (idx > totalQuestions ? document.getElementById('card-finish') :
+                    document.getElementById(`card-${idx}`));
+
+            if (currentCard === targetCard) return;
+
+            // Animate current card out
+            if (currentCard) {
+                currentCard.classList.remove('active');
+                if (direction === 'next') {
+                    currentCard.classList.add('exit-left');
+                } else {
+                    currentCard.classList.add('exit-right');
+                }
+
+                // Cleanup current card after animation
+                setTimeout(() => {
+                    currentCard.classList.remove('exit-left', 'exit-right');
+                }, 600);
+            }
+
+            // Animate target card in
+            targetCard.classList.add('active');
+            updateProgress(idx);
+            currentIdx = idx;
+
+            // Focus Management for Keyboard Navigation
+            if (idx > 0 && idx <= totalQuestions) {
+                // Focus on the first option (Yes) when card appears
+                setTimeout(() => {
+                    const yesBtn = document.getElementById(`btn-${idx}-y`);
+                    if (yesBtn) yesBtn.focus();
+                }, 100); // Slight delay to allow display:flex to apply
+            } else if (idx === 0) {
+                setTimeout(() => {
+                    document.getElementById('branch_name').focus();
+                }, 100);
+            }
+        }
+
+        function goToNext(current) {
+            if (current === 0) {
+                const fields = ['branch_name', 'user_name', 'crm_id', 'email_address'];
+                for (const fieldId of fields) {
+                    const el = document.getElementById(fieldId);
+                    if (!el.value.trim()) {
+                        alert(`${el.placeholder}을(를) 입력해 주세요.`);
+                        el.focus();
+                        return;
+                    }
+                }
+            }
+            showCard(current + 1, 'next');
+        }
+
+        function selectOption(id, idx) {
+            document.getElementById(id).checked = true;
+            // Short delay for visual feedback
+            setTimeout(() => {
+                goToNext(idx);
+            }, 300);
+        }
+
+        function goToPrev(idx) {
+            // Logic to go back
+            const targetIdx = idx === 1 ? 0 : idx - 1;
+            showCard(targetIdx, 'prev');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테스트 결과 - {{ mbti }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --secondary: #ec4899;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+
+        body {
+            font-family: 'Outfit', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #fef2f2 100%);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 30px;
+            padding: 60px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-name {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .mbti-code {
+            font-size: 5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+            letter-spacing: -0.05em;
+        }
+
+        .mbti-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 30px;
+        }
+
+        .description-box {
+            text-align: left;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .description-box p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #475569;
+        }
+
+        .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .tag {
+            background: #f1f5ff;
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 99px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .score-section {
+            margin-top: 50px;
+            text-align: left;
+        }
+
+        .score-group {
+            margin-bottom: 25px;
+        }
+
+        .score-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+
+        .score-bar-bg {
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 99px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .left-fill {
+            background: var(--primary);
+            width: 0;
+        }
+
+        .right-fill {
+            background: var(--secondary);
+            width: 0;
+        }
+
+        .instructor-stats {
+            margin: 25px 0;
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: left;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-weight: 800;
+            color: var(--primary);
+            min-width: 90px;
+        }
+
+        .stat-value {
+            color: #475569;
+            font-weight: 600;
+            flex: 1;
+            text-align: right;
+            font-size: 0.95rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 60px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 18px;
+            border-radius: 15px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        @media print {
+            @media print {
+                @page {
+                    size: A4;
+                    margin: 10mm;
+                }
+
+                body {
+                    background: white !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                    zoom: 0.85;
+                    /* Scale down to fit */
+                }
+
+                .container {
+                    width: 100%;
+                    max-width: none;
+                    padding: 0;
+                    margin: 0;
+                }
+
+                .result-card {
+                    box-shadow: none;
+                    border: none;
+                    background: white;
+                    padding: 0;
+                    backdrop-filter: none;
+                    animation: none;
+                }
+
+                .score-section {
+                    margin-top: 20px;
+                }
+
+                .score-group {
+                    margin-bottom: 10px;
+                }
+
+                .mbti-title {
+                    margin-bottom: 20px;
+                    font-size: 1.5rem;
+                }
+
+                .mbti-code {
+                    font-size: 4rem;
+                    margin-top: 0;
+                    color: var(--primary);
+                    -webkit-text-fill-color: var(--primary);
+                    -webkit-background-clip: unset;
+                }
+
+                .instructor-stats {
+                    margin: 15px 0;
+                    padding: 15px;
+                }
+
+                .stat-row {
+                    padding: 8px 0;
+                }
+
+                .description-box {
+                    padding: 20px;
+                    margin-bottom: 0;
+                    border: 1px solid #ddd;
+                }
+
+                .actions {
+                    display: none !important;
+                }
+
+                .score-bar-fill,
+                .tag {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+            }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="result-card">
+            <p class="user-name">{{ name }}님의 분석 결과</p>
+            <div class="mbti-code">{{ mbti }}</div>
+            <div class="mbti-title">{{ info.title }}</div>
+
+            <div class="score-section">
+                <div class="score-group">
+                    <div class="score-labels"><span>외향(E) {{ scores.E }}</span> <span>내향(I) {{ scores.I }}</span></div>
+                    <div class="score-bar-bg">
+                        <div class="score-bar-fill left-fill" id="bar-E"></div>
+                        <div class="score-bar-fill right-fill" id="bar-I"></div>
+                    </div>
+                </div>
+                <div class="score-group">
+                    <div class="score-labels"><span>감각(S) {{ scores.S }}</span> <span>직관(N) {{ scores.N }}</span></div>
+                    <div class="score-bar-bg">
+                        <div class="score-bar-fill left-fill" id="bar-S"></div>
+                        <div class="score-bar-fill right-fill" id="bar-N"></div>
+                    </div>
+                </div>
+                <div class="score-group">
+                    <div class="score-labels"><span>사고(T) {{ scores.T }}</span> <span>감정(F) {{ scores.F }}</span></div>
+                    <div class="score-bar-bg">
+                        <div class="score-bar-fill left-fill" id="bar-T"></div>
+                        <div class="score-bar-fill right-fill" id="bar-F"></div>
+                    </div>
+                </div>
+                <div class="score-group">
+                    <div class="score-labels"><span>판단(J) {{ scores.J }}</span> <span>인식(P) {{ scores.P }}</span></div>
+                    <div class="score-bar-bg">
+                        <div class="score-bar-fill left-fill" id="bar-J"></div>
+                        <div class="score-bar-fill right-fill" id="bar-P"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="instructor-stats">
+                {% for stat in info.stats %}
+                <div class="stat-row">
+                    <span class="stat-label">{{ stat.label }}</span>
+                    <span class="stat-value">{{ stat.value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="description-box">
+                <p style="font-weight: 700; color: var(--primary); margin-bottom: 5px;">[에이닷 강사로서의 장점]</p>
+                <p>{{ info.description }}</p>
+                <div class="keywords">
+                    {% for tag in info.keywords %}
+                    <span class="tag">#{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="actions">
+                <a href="/" class="btn btn-primary">다시 테스트하기</a>
+                <button onclick="copyToClipboard()" class="btn btn-secondary">결과 복사하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = () => {
+            // 가장 안전한 데이터 매핑 방식 (문자열로 감싸서 가져오기)
+            const scores = {
+                E: Number("{{ scores.E }}") || 0,
+                I: Number("{{ scores.I }}") || 0,
+                S: Number("{{ scores.S }}") || 0,
+                N: Number("{{ scores.N }}") || 0,
+                T: Number("{{ scores.T }}") || 0,
+                F: Number("{{ scores.F }}") || 0,
+                J: Number("{{ scores.J }}") || 0,
+                P: Number("{{ scores.P }}") || 0
+            };
+
+            const pairs = [['E', 'I'], ['S', 'N'], ['T', 'F'], ['J', 'P']];
+
+            pairs.forEach(([left, right]) => {
+                const total = scores[left] + scores[right];
+                const leftBar = document.getElementById(`bar-${left}`);
+                const rightBar = document.getElementById(`bar-${right}`);
+
+                if (total > 0 && leftBar && rightBar) {
+                    const leftPct = (scores[left] / total) * 100;
+                    const rightPct = (scores[right] / total) * 100;
+                    leftBar.style.width = leftPct + '%';
+                    rightBar.style.width = rightPct + '%';
+                }
+            });
+        };
+
+        function copyToClipboard() {
+            let statsText = "";
+            /* Jinja2 반복문을 JS 내부에서 사용할 때 주의 */
+            {% for stat in info.stats %}
+            statsText += "- {{ stat.label }}: {{ stat.value }}\n";
+            {% endfor %}
+
+            const text = `[A.영어학원 MBTI 테스트 결과]\n나의 유형: {{ mbti }} ({{ info.title }})\n\n[주요 성향]\n${statsText}\n[에이닷 강사로서의 장점]\n{{ info.description }}`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('결과가 클립보드에 복사되었습니다!');
+            }).catch(err => {
+                alert('복사 실패! 브라우저의 복사 권한을 확인해주세요.');
+            });
+        }
+    </script>
